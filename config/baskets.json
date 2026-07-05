@@ -1,0 +1,13 @@
+{
+  "config_version": "2026-07-04",
+  "benchmark": {"ticker": "SOXX", "note": "用SOXX ETF而非^SOX指数，yfinance数据可靠性优先；口径差异可接受，因本看板只看相对形态"},
+  "baskets": {
+    "MEM":   {"label": "存储",   "tickers": ["MU", "SNDK"],           "weight": "equal"},
+    "OPT":   {"label": "光通信", "tickers": ["COHR", "LITE", "FN"],   "weight": "equal"},
+    "GPU":   {"label": "GPU链",  "tickers": ["NVDA", "AMD", "AVGO"],  "weight": "equal"},
+    "NCLOUD":{"label": "新云",   "tickers": ["CRWV", "NBIS", "IREN"], "weight": "equal"}
+  },
+  "changelog": [
+    {"date": "2026-07-04", "change": "初始成分", "reason": "v0.1.1规格"}
+  ]
+}

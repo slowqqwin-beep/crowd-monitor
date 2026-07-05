@@ -1,0 +1,12 @@
+{
+  "events": [
+    {
+      "date": "2026-07-07",
+      "date_confirmed": false,
+      "name": "三星 Q2 初步业绩（preliminary）",
+      "category": "memory_truth",
+      "hypothesis": "存储ASP动能是否兑现Q2的合同价预测",
+      "note": "三大存储厂最快真值，早于正式财报约3周"
+    }
+  ]
+}

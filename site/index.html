@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CROWD — AI硬件链挤压强度监视看板</title>
+<style>
+:root{--bg:#0d1117;--card:#161b22;--border:#30363d;--text:#c9d1d9;--muted:#8b949e;--accent:#58a6ff;--warn:#d29922;--red:#f85149;--green:#3fb950}
+*{box-sizing:border-box}body{margin:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);line-height:1.5}
+header{margin-bottom:24px;padding-bottom:16px;border-bottom:1px solid var(--border)}
+header p{margin:4px 0;color:var(--muted);font-size:14px}
+main{max-width:960px;margin:0 auto;padding:20px}
+h2{font-size:18px;margin:32px 0 12px;color:var(--accent)}
+h3{font-size:15px;margin:20px 0 10px;color:var(--text)}
+.positioning{background:#1a1f2e;border:1px solid #303d5a;border-radius:6px;padding:12px 16px;margin-bottom:24px;font-size:13px;color:#8b9bb4}
+.stale-banner{background:#3d2e00;color:#d29922;padding:8px 16px;border-radius:4px;margin-bottom:16px;font-weight:bold}
+table{width:100%;border-collapse:collapse;margin:8px 0 20px;font-size:13px}
+th,td{padding:6px 10px;text-align:right;border-bottom:1px solid var(--border)}
+th{color:var(--muted);font-weight:normal;text-align:left}
+td:first-child,th:first-child{text-align:left}
+td{font-variant-numeric:tabular-nums}
+.z-high{background:#3d1a00;color:var(--warn);font-weight:bold}
+canvas{width:100%;max-height:320px;margin:8px 0 20px}
+.meta{font-size:12px;color:var(--muted);margin-top:4px}
+.footer{margin-top:40px;padding-top:16px;border-top:1px solid var(--border);font-size:12px;color:var(--muted)}
+.footer details{margin:8px 0}
+.footer summary{cursor:pointer;color:var(--accent)}
+.calendar-item{padding:6px 10px;margin:4px 0;border-left:3px solid var(--accent);font-size:13px}
+.calendar-item.past{opacity:0.5;border-left-color:var(--muted)}
+.calendar-item .countdown{font-weight:bold;color:var(--warn)}
+.calendar-item .hypothesis{color:var(--muted);font-size:12px;margin-top:2px}
+.label{display:inline-block;padding:0 6px;border-radius:3px;font-size:11px;margin-right:4px}
+.label-mem{background:#1a3a1a;color:#3fb950}.label-opt{background:#3a1a1a;color:#f85149}.label-gpu{background:#1a1a3a;color:#58a6ff}.label-ncloud{background:#3a2a1a;color:#d29922}
+</style>
+</head>
+<body>
+<main>
+<header>
+<h1>CROWD v0.1</h1>
+<p>AI硬件链挤压强度监视看板 · 人眼研究工具</p>
+</header>
+
+<div class="positioning">
+本看板为人眼研究监视器（human-eye research monitor），定位对标SR3看板。不产生任何机械信号，不接入 ABCD v3.5 / ABCDS v0.5 的任何状态机、信号管线或仓位模块。全部输出仅供人工判断AI硬件链内短线切换参考。禁止未来任何版本在未经独立审计的情况下将本看板数据接入主框架（防 "integrated but never declared" 风险）。
+</div>
+
+<div id="stale-banner" style="display:none" class="stale-banner"></div>
+
+<section id="panel1">
+<h2>面板一 · 链内相对强度</h2>
+<p style="font-size:13px;color:var(--muted)">数据日期：<span id="as-of">—</span></p>
+
+<h3>核心剪刀差：MEM/SOXX − OPT/SOXX</h3>
+<canvas id="scissors-chart"></canvas>
+<p class="meta">当前值：<span id="scissors-val">—</span> · 20日方向：<span id="scissors-dir">—</span></p>
+
+<details style="font-size:12px;color:var(--muted);margin-bottom:16px">
+<summary>读法说明</summary>
+剪刀差走阔 = 挤压叙事升温；剪刀差见顶回落而季度真值锚（面板三）仍在上修 = price-in 完成的候选信号，光模块折价回吐观察点。反之剪刀差与真值锚同向再加速 = 均值回归情景权重上调。本说明为读法参考，非信号规则。
+</details>
+
+<h3>篮子比值曲线（基准：SOXX=1.0）</h3>
+<canvas id="ratios-chart"></canvas>
+
+<h3>读数表</h3>
+<table>
+<thead><tr><th>篮子</th><th>比值</th><th>20d动量</th><th>60d动量</th><th>z-score</th></tr></thead>
+<tbody id="readings-body"></tbody>
+</table>
+</section>
+
+<section id="panel4">
+<h2>面板四 · 信息节点日历</h2>
+<p style="font-size:12px;color:var(--muted)">
+<a href="crowd_calendar.ics" style="color:var(--accent)">下载 ICS 日历订阅文件</a> · Google日历：通过网址添加 calendar
+</p>
+<div id="calendar-list"></div>
+</section>
+
+<div class="footer">
+<details>
+<summary>篮子成分 &amp; 变更记录</summary>
+<pre id="changelog-text" style="font-size:12px;color:var(--muted)"></pre>
+</details>
+<p style="margin-top:8px">CROWD v0.1.1 · 构建时间：<span id="build-time">—</span></p>
+</div>
+</main>
+
+<script>
+async function load() {
+  const r = await fetch("data/panel_data.json");
+  const d = await r.json();
+
+  document.getElementById("as-of").textContent = d.data_as_of;
+  document.getElementById("build-time").textContent = d.generated;
+  
+  if (d.stale_days > 0) {
+    const b = document.getElementById("stale-banner");
+    b.style.display = "block";
+    b.textContent = `STALE — 数据滞后 ${d.stale_days} 天 (as-of ${d.data_as_of})`;
+  }
+
+  // Ratios chart
+  drawChart("ratios-chart", d.ratios, d.baskets);
+  
+  // Scissors
+  if (d.scissors && Object.keys(d.scissors).length > 0) {
+    drawScissors("scissors-chart", d.scissors);
+    const vals = Object.values(d.scissors);
+    const last = vals[vals.length - 1];
+    const prev = vals.length > 20 ? vals[vals.length - 21] : vals[0];
+    document.getElementById("scissors-val").textContent = last.toFixed(4);
+    document.getElementById("scissors-dir").textContent = last > prev ? "↑" : "↓";
+  }
+
+  // Readings table
+  const tb = document.getElementById("readings-body");
+  for (const r of d.readings || []) {
+    const zCls = r.z_score && Math.abs(r.z_score) >= 2 ? " class='z-high'" : "";
+    tb.innerHTML += `<tr>
+      <td><span class="label label-${r.basket.toLowerCase()}">${r.basket}</span>${r.label}</td>
+      <td>${r.ratio}</td><td>${r.momentum_20d ?? '—'}%</td><td>${r.momentum_60d ?? '—'}%</td>
+      <td${zCls}>${r.z_score ?? '—'}</td></tr>`;
+  }
+
+  // Changelog
+  if (d.config && d.config.changelog) {
+    const ch = d.config.changelog.map(c => `${c.date}: ${c.change} (${c.reason})`);
+    document.getElementById("changelog-text").textContent = ch.join("\n");
+    // config_change_dates for vertical dashed lines on chart
+    window._changeDates = d.config_change_dates || [];
+  }
+}
+
+async function loadCalendar() {
+  const r = await fetch("data/calendar.json");
+  const cal = await r.json();
+  const today = new Date().toISOString().slice(0, 10);
+  const cdiv = document.getElementById("calendar-list");
+  for (const evt of (cal.events || [])) {
+    const isPast = evt.date < today;
+    const days = Math.ceil((new Date(evt.date) - new Date(today)) / 86400000);
+    const conf = evt.date_confirmed ? "" : "（预估）";
+    const cats = {memory_truth:"#3fb950",capex_guidance:"#58a6ff",trendforce_release:"#d29922",optics_earnings:"#f85149"};
+    const color = cats[evt.category] || "#8b949e";
+    cdiv.innerHTML += `<div class="calendar-item${isPast?' past':''}" style="border-left-color:${color}">
+      <strong>${evt.date}${conf}</strong> <span class="countdown">(${days > 0 ? 'T-'+days : '已过期'})</span> — ${evt.name}
+      <div class="hypothesis">验证假设：${evt.hypothesis}</div>
+    </div>`;
+  }
+}
+
+function drawChart(canvasId, ratios, baskets) {
+  const canvas = document.getElementById(canvasId);
+  const ctx = canvas.getContext("2d");
+  const dpr = window.devicePixelRatio || 1;
+  const rect = canvas.getBoundingClientRect();
+  canvas.width = rect.width * dpr; canvas.height = 300 * dpr;
+  ctx.scale(dpr, dpr);
+  canvas.style.height = "300px";
+  
+  const W = rect.width, H = 300;
+  ctx.clearRect(0, 0, W, H);
+  
+  // Grid
+  ctx.strokeStyle = "#21262d"; ctx.lineWidth = 0.5;
+  for (let i = 0; i < 5; i++) { const y = 30 + i * 60; ctx.beginPath(); ctx.moveTo(60, y); ctx.lineTo(W - 20, y); ctx.stroke(); }
+  
+  // Baseline
+  ctx.strokeStyle = "#30363d"; ctx.setLineDash([4, 4]);
+  ctx.beginPath(); ctx.moveTo(60, 150); ctx.lineTo(W - 20, 150); ctx.stroke();
+  ctx.setLineDash([]);
+  
+  const colors = {MEM: "#3fb950", OPT: "#f85149", GPU: "#58a6ff", NCLOUD: "#d29922"};
+  const allDates = [...new Set(Object.values(ratios).flatMap(r => Object.keys(r)))].sort();
+  if (allDates.length < 2) return;
+  const xScale = (i) => 60 + (i / (allDates.length - 1)) * (W - 80);
+  
+  // Find min/max across all ratios
+  let allVals = [1.0];
+  for (const r of Object.values(ratios)) allVals.push(...Object.values(r));
+  const yMin = Math.min(...allVals) * 0.95, yMax = Math.max(...allVals) * 1.05;
+  const yRange = yMax - yMin || 1;
+  const yScale = (v) => 270 - ((v - yMin) / yRange) * 240;
+  
+  for (const [name, ratio] of Object.entries(ratios)) {
+    ctx.strokeStyle = colors[name] || "#ccc";
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    let first = true;
+    for (const d of allDates) {
+      const v = ratio[d];
+      if (v === undefined) continue;
+      const x = xScale(allDates.indexOf(d)), y = yScale(v);
+      if (first) { ctx.moveTo(x, y); first = false; }
+      else ctx.lineTo(x, y);
+    }
+    ctx.stroke();
+    // Label
+    ctx.fillStyle = colors[name] || "#ccc";
+    ctx.font = "12px sans-serif";
+    const lbl = baskets?.[name]?.label || name;
+    ctx.fillText(lbl, W - 80, yScale(ratio[allDates[allDates.length - 1]]));
+  }
+  // Config change vertical dashed lines
+  if (window._changeDates && window._changeDates.length > 0) {
+    ctx.save();
+    ctx.strokeStyle = "#d29922";
+    ctx.lineWidth = 1;
+    ctx.setLineDash([4, 4]);
+    ctx.font = "10px sans-serif";
+    ctx.fillStyle = "#d29922";
+    for (const cd of window._changeDates) {
+      const idx = allDates.indexOf(cd);
+      if (idx >= 0) {
+        const cx = xScale(idx);
+        ctx.beginPath(); ctx.moveTo(cx, 30); ctx.lineTo(cx, 280); ctx.stroke();
+        ctx.fillText(cd, cx + 4, 40);
+      }
+    }
+    ctx.restore();
+  }
+
+  ctx.fillStyle = "#8b949e"; ctx.font = "11px sans-serif";
+  ctx.fillText("SOXX=1.0", 60, 145);
+  ctx.fillText(yMax.toFixed(2), 30, 45);
+  ctx.fillText(yMin.toFixed(2), 30, 275);
+}
+
+function drawScissors(canvasId, series) {
+  const canvas = document.getElementById(canvasId);
+  const ctx = canvas.getContext("2d");
+  const dpr = window.devicePixelRatio || 1;
+  const rect = canvas.getBoundingClientRect();
+  canvas.width = rect.width * dpr; canvas.height = 300 * dpr;
+  ctx.scale(dpr, dpr);
+  canvas.style.height = "300px";
+  
+  const W = rect.width, H = 300;
+  ctx.clearRect(0, 0, W, H);
+  
+  const dates = Object.keys(series).sort();
+  if (dates.length < 2) return;
+  const vals = dates.map(d => series[d]);
+  const yMin = Math.min(...vals) * 1.1, yMax = Math.max(...vals) * 1.1;
+  const yRange = yMax - yMin || 1;
+  const xScale = (i) => 60 + (i / (dates.length - 1)) * (W - 80);
+  const yScale = (v) => 270 - ((v - yMin) / yRange) * 240;
+  
+  // Zero line
+  const zeroY = yScale(0);
+  ctx.strokeStyle = "#30363d"; ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(60, zeroY); ctx.lineTo(W - 20, zeroY); ctx.stroke();
+  
+  // Fill
+  ctx.fillStyle = "rgba(88, 166, 255, 0.1)";
+  ctx.beginPath();
+  ctx.moveTo(xScale(0), zeroY);
+  for (let i = 0; i < dates.length; i++) ctx.lineTo(xScale(i), yScale(vals[i]));
+  ctx.lineTo(xScale(dates.length - 1), zeroY);
+  ctx.fill();
+  
+  // Line
+  ctx.strokeStyle = "#58a6ff"; ctx.lineWidth = 2;
+  ctx.beginPath();
+  for (let i = 0; i < dates.length; i++) ctx.lineTo(xScale(i), yScale(vals[i]));
+  ctx.stroke();
+  
+  ctx.fillStyle = "#8b949e"; ctx.font = "11px sans-serif";
+  ctx.fillText("0", 40, zeroY + 4);
+  ctx.fillText(yMax.toFixed(4), 30, 45);
+  ctx.fillText(yMin.toFixed(4), 30, 275);
+}
+
+load(); loadCalendar();
+</script>
+</body>
+</html>

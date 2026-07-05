@@ -1,0 +1,29 @@
+name: CROWD Daily Update
+on:
+  schedule:
+    - cron: "30 22 * * 1-5"  # UTC 22:30 weekdays (after US close)
+  workflow_dispatch:
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install yfinance pandas pyarrow icalendar pytest
+      - run: python scripts/fetch_prices.py
+      - name: Validate
+        run: |
+          python scripts/build_panels.py
+          python scripts/validate.py || { echo "VALIDATE FAILED — blocking commit"; exit 1; }
+      - run: pip install pytest && python -m pytest tests/test_negative.py -q --tb=short || { echo "NEGATIVE TESTS FAILED"; exit 1; }
+      - name: Commit and push
+        run: |
+          git config user.name "crowd-bot"
+          git config user.email "bot@crowd-monitor"
+          git add site/data/*.json site/crowd_calendar.ics
+          git diff --staged --quiet || (git commit -m "auto: $(date +%Y-%m-%d) daily update" && git push)
