@@ -1,5 +1,5 @@
 """Build panels: relative strength ratios, z-scores, scissors spread, ICS.
-Reads data/prices/*.parquet, writes site/data/*.json + site/crowd_calendar.ics
+Reads data/prices/*.parquet, writes docs/data/*.json + docs/crowd_calendar.ics
 """
 import json, hashlib, pathlib
 from datetime import date, datetime, timedelta
@@ -10,7 +10,7 @@ from loader import load_baskets
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 PRICES_DIR = ROOT / "data" / "prices"
 CALENDAR_PATH = ROOT / "data" / "calendar.json"
-SITE_DIR = ROOT / "site"
+SITE_DIR = ROOT / "docs"
 DATA_DIR = SITE_DIR / "data"
 DATA_DIR.mkdir(parents=True, exist_ok=True)
 

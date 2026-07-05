@@ -7,7 +7,7 @@ import pytest
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 BASKETS_PATH = ROOT / "config" / "baskets.json"
 CALENDAR_PATH = ROOT / "data" / "calendar.json"
-SITE_DIR = ROOT / "site"
+SITE_DIR = ROOT / "docs"
 DATA_DIR = SITE_DIR / "data"
 
 # ── N1: No forward-fill on missing prices ──

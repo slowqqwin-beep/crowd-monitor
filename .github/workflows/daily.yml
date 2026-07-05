@@ -25,5 +25,5 @@ jobs:
         run: |
           git config user.name "crowd-bot"
           git config user.email "bot@crowd-monitor"
-          git add site/data/*.json site/crowd_calendar.ics
+          git add docs/data/*.json docs/crowd_calendar.ics
           git diff --staged --quiet || (git commit -m "auto: $(date +%Y-%m-%d) daily update" && git push)

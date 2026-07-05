@@ -5,8 +5,8 @@ import json, hashlib, pathlib, sys
 from datetime import date
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
-DATA_DIR = ROOT / "site" / "data"
-SITE_DIR = ROOT / "site"
+DATA_DIR = ROOT / "docs" / "data"
+SITE_DIR = ROOT / "docs"
 BASKETS_PATH = ROOT / "config" / "baskets.json"
 CALENDAR_PATH = ROOT / "data" / "calendar.json"
 
