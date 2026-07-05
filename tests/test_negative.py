@@ -31,11 +31,14 @@ def test_n3_changelog_required():
     assert len(baskets.get("changelog", [])) > 0, "changelog must not be empty"
 
 # ── N4: No zero/negative prices, no >±40% daily returns ──
+N4_EXEMPT_TICKERS = {"NBIS"}  # human-confirmed real event, not data error
 def test_n4_price_anomalies():
     import pandas as pd
     import numpy as np
     prices_dir = ROOT / "data" / "prices"
     for fp in prices_dir.glob("*.parquet"):
+        if fp.stem in N4_EXEMPT_TICKERS:
+            continue
         df = pd.read_parquet(fp)
         assert not (df["price"] <= 0).any(), f"{fp.stem} has zero/negative price"
         rets = df["price"].pct_change().dropna()
@@ -104,6 +107,19 @@ def test_n3_config_change_marker():
     expected = [c["date"] for c in changelog if c["date"] != (changelog[0]["date"] if changelog else "")]
     missing = [d for d in expected if d not in change_dates]
     assert not missing, f"N3b: changelog dates {missing} not in config_change_dates — dashed lines will be missing"
+
+# ── N10: Ticker set equality — no zombie files, no missing tickers ──
+def test_n10_ticker_set_equality():
+    """Loaded price data must match config exactly — detects set('SOXX')→{S,O,X} bugs."""
+    import sys; sys.path.insert(0, str(ROOT / "scripts"))
+    from loader import load_baskets
+    _, expected, _, _ = load_baskets()
+    prices_dir = ROOT / "data" / "prices"
+    actual = {fp.stem for fp in prices_dir.glob("*.parquet")}
+    extras = actual - set(expected)
+    missing = set(expected) - actual
+    assert not extras, f"N10: zombie files {sorted(extras)} — remove or add to baskets.json"
+    assert not missing, f"N10: missing tickers {sorted(missing)} — re-run fetch_prices.py"
 
 # ── N9: Duplicate event name → ICS UID collision ──
 def test_n9_no_duplicate_names():

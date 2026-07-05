@@ -27,7 +27,24 @@ if len(baskets.get("changelog", [])) == 0:
     errors.append("N3: changelog empty — must have at least initial entry")
 
 # ── N4: Price anomaly check ──
+N4_EXEMPT_TICKERS = {
+    "NBIS": "2025-09-09 +49.4% — confirmed real market event, not data error"
+}
 PRICES_DIR = ROOT / "data" / "prices"
+
+# ── N10: Ticker set equality — loaded data must match config exactly ──
+from loader import load_baskets
+_, expected_tickers, _, _ = load_baskets()
+actual_tickers = {fp.stem for fp in PRICES_DIR.glob("*.parquet")}
+extras = actual_tickers - set(expected_tickers)
+missing = set(expected_tickers) - actual_tickers
+if extras:
+    errors.append(f"N10: extra tickers in data/prices/ (zombie files?): {sorted(extras)}")
+if missing:
+    errors.append(f"N10: missing tickers: {sorted(missing)} — re-run fetch_prices.py")
+# N11: zombie file detection (tickers in prices/ not in config)
+if extras:
+    errors.append(f"N11: ZOMBIE FILES in data/prices/ — not declared in baskets.json: {sorted(extras)}. Delete them.")
 import pandas as pd
 import numpy as np
 for fp in PRICES_DIR.glob("*.parquet"):
@@ -35,6 +52,8 @@ for fp in PRICES_DIR.glob("*.parquet"):
     if (df["price"] <= 0).any():
         errors.append(f"N4: {fp.stem} has zero/negative price")
     rets = df["price"].pct_change().dropna()
+    if fp.stem in N4_EXEMPT_TICKERS:
+        continue  # human-confirmed outlier, not a data error
     if (abs(rets) > 0.40).any():
         errors.append(f"N4: {fp.stem} has >±40% daily return")
 

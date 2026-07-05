@@ -1,22 +1,19 @@
 """Fetch daily prices from yfinance for all basket tickers + benchmark.
 Output: data/prices/{ticker}.parquet
 """
-import json, pathlib
+"""Fetch daily prices from yfinance for all basket tickers + benchmark.
+Output: data/prices/{ticker}.parquet
+"""
+import pathlib
 import yfinance as yf
 import pandas as pd
+from loader import load_baskets
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
-BASKETS_PATH = ROOT / "config" / "baskets.json"
 PRICES_DIR = ROOT / "data" / "prices"
 PRICES_DIR.mkdir(parents=True, exist_ok=True)
 
-with open(BASKETS_PATH, encoding="utf-8") as f:
-    cfg = json.load(f)
-
-all_tickers = set(cfg["benchmark"]["ticker"])
-for bname, basket in cfg["baskets"].items():
-    for t in basket["tickers"]:
-        all_tickers.add(t)
+benchmark, all_tickers, baskets, cfg = load_baskets()
 
 print(f"[fetch] {len(all_tickers)} tickers: {sorted(all_tickers)}")
 

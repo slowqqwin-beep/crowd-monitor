@@ -5,23 +5,18 @@ import json, hashlib, pathlib
 from datetime import date, datetime, timedelta
 import pandas as pd
 import numpy as np
+from loader import load_baskets
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
-BASKETS_PATH = ROOT / "config" / "baskets.json"
 PRICES_DIR = ROOT / "data" / "prices"
 CALENDAR_PATH = ROOT / "data" / "calendar.json"
 SITE_DIR = ROOT / "site"
 DATA_DIR = SITE_DIR / "data"
 DATA_DIR.mkdir(parents=True, exist_ok=True)
 
-with open(BASKETS_PATH, encoding="utf-8") as f:
-    cfg = json.load(f)
+benchmark_ticker, all_tickers, baskets_cfg, cfg = load_baskets()
 
 # ── Load prices ──
-all_tickers = set(cfg["benchmark"]["ticker"])
-for b in cfg["baskets"].values():
-    for t in b["tickers"]:
-        all_tickers.add(t)
 
 prices = {}
 for t in sorted(all_tickers):
@@ -47,24 +42,27 @@ def basket_index(tickers, df):
     valid = [t for t in tickers if t in df.columns]
     if not valid:
         return pd.Series(np.nan, index=df.index)
-    rets = df[valid].pct_change()
+    rets = df[valid].pct_change().fillna(0.0)
     # Equal weight daily return
     daily = rets.mean(axis=1)
     # Cumulative
     idx = (1 + daily).cumprod() * 100
-    idx.iloc[0] = 100.0
     return idx
 
-benchmark_idx = basket_index([cfg["benchmark"]["ticker"]], price_df)
+benchmark_idx = basket_index([benchmark_ticker], price_df)
 basket_indices = {}
-for name, basket in cfg["baskets"].items():
+for name, basket in baskets_cfg.items():
     basket_indices[name] = basket_index(basket["tickers"], price_df)
 
 # ── Relative strength ratios vs SOXX ──
 ratios = {}
 for name, idx in basket_indices.items():
-    ratios[name] = idx / benchmark_idx
-    ratios[name] = ratios[name] / ratios[name].dropna().iloc[0]  # normalize to 1.0
+    r = idx / benchmark_idx
+    r_drop = r.dropna()
+    if len(r_drop) == 0:
+        ratios[name] = pd.Series(1.0, index=r.index)
+    else:
+        ratios[name] = r / r_drop.iloc[0]
 
 # ── Derivative metrics ──
 def momentum(series, window):
@@ -83,10 +81,11 @@ for name, r in ratios.items():
     cur = latest.iloc[-1]
     mom20 = momentum(r, 20).dropna().iloc[-1] if len(r.dropna()) > 20 else None
     mom60 = momentum(r, 60).dropna().iloc[-1] if len(r.dropna()) > 60 else None
-    z = rolling_zscore(r).dropna().iloc[-1] if len(r.dropna()) >= 20 else None
+    zs = rolling_zscore(r).dropna()
+    z = float(zs.iloc[-1]) if len(zs) > 0 else None
     readings.append({
         "basket": name,
-        "label": cfg["baskets"][name]["label"],
+        "label": baskets_cfg[name]["label"],
         "ratio": round(float(cur), 4),
         "momentum_20d": round(float(mom20), 2) if mom20 is not None else None,
         "momentum_60d": round(float(mom60), 2) if mom60 is not None else None,
@@ -109,11 +108,11 @@ panel_data = {
     "data_as_of": str(price_df.index[-1].date()),
     "stale_days": (date.today() - price_df.index[-1].date()).days,
     "readings": readings,
-    "benchmark_ticker": cfg["benchmark"]["ticker"],
+    "benchmark_ticker": benchmark_ticker,
     "scissors": serialize_series(scissors) if scissors is not None else {},
     "ratios": {name: serialize_series(r) for name, r in ratios.items()},
     "baskets": {name: {"label": b["label"], "tickers": b["tickers"]}
-                for name, b in cfg["baskets"].items()},
+                for name, b in baskets_cfg.items()},
     "config": {"version": cfg["config_version"], "changelog": cfg["changelog"]},
     "config_change_dates": [c["date"] for c in cfg.get("changelog", []) if c["date"] != cfg["changelog"][0]["date"]],
 }
