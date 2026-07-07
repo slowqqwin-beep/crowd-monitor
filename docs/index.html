@@ -27,6 +27,8 @@ canvas{width:100%;max-height:320px;margin:8px 0 20px}
 .footer summary{cursor:pointer;color:var(--accent)}
 .calendar-item{padding:6px 10px;margin:4px 0;border-left:3px solid var(--accent);font-size:13px}
 .calendar-item.past{opacity:0.5;border-left-color:var(--muted)}
+.calendar-item.today{background:#1a2f1a;border-left-width:5px}
+.today-badge{background:var(--green);color:#000;padding:0 4px;border-radius:3px;font-weight:bold}
 .calendar-item .countdown{font-weight:bold;color:var(--warn)}
 .calendar-item .hypothesis{color:var(--muted);font-size:12px;margin-top:2px}
 .label{display:inline-block;padding:0 6px;border-radius:3px;font-size:11px;margin-right:4px}
@@ -139,12 +141,14 @@ async function loadCalendar() {
   const cdiv = document.getElementById("calendar-list");
   for (const evt of (cal.events || [])) {
     const isPast = evt.date < today;
-    const days = Math.ceil((new Date(evt.date) - new Date(today)) / 86400000);
+    const isToday = evt.date === today;
+    const days = Math.ceil((new Date(evt.date + 'T12:00+08:00') - new Date(today + 'T12:00+08:00')) / 86400000);
     const conf = evt.date_confirmed ? "" : "（预估）";
     const cats = {memory_truth:"#3fb950",capex_guidance:"#58a6ff",trendforce_release:"#d29922",optics_earnings:"#f85149"};
     const color = cats[evt.category] || "#8b949e";
-    cdiv.innerHTML += `<div class="calendar-item${isPast?' past':''}" style="border-left-color:${color}">
-      <strong>${evt.date}${conf}</strong> <span class="countdown">(${days > 0 ? 'T-'+days : '已过期'})</span> — ${evt.name}
+    const countdownLabel = isToday ? '今天 T-0' : (days > 0 ? 'T-'+days : '已过期');
+    cdiv.innerHTML += `<div class="calendar-item${isPast?' past':''}${isToday?' today':''}" style="border-left-color:${color}">
+      <strong>${evt.date}${conf}</strong> <span class="countdown${isToday?' today-badge':''}">(${countdownLabel})</span> — ${evt.name}
       <div class="hypothesis">验证假设：${evt.hypothesis}</div>
     </div>`;
   }
