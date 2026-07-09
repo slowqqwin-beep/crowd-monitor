@@ -1,12 +1,60 @@
 {
  "events": [
   {
-   "date": "2026-07-07",
+   "date": "2026-07-10",
    "date_confirmed": false,
-   "name": "三星 Q2 初步业绩（preliminary）",
+   "name": "SK海力士 ADR 纳斯达克上市",
    "category": "memory_truth",
-   "hypothesis": "存储ASP动能是否兑现Q2的合同价预测",
-   "note": "三大存储厂最快真值，早于正式财报约3周"
+   "hypothesis": "存储侧情绪温度计：存储龙头选择在周期顶部区域赴美上市+上市首日定价反应=增量资金是否仍愿意在这个位置承接存储暴露",
+   "note": "非真值节点，旁证用途；假设成立则说明存储侧增量资金仍在进场，不成立则佐证'Samsung sell the news'的获利了结叙事"
+  },
+  {
+   "date": "2026-07-29",
+   "date_confirmed": false,
+   "name": "2026Q2 大厂财报季capex指引（META/MSFT/GOOGL先发）",
+   "category": "capex_guidance",
+   "hypothesis": "分母总盘子检验：2026指引维持或上修=挤压被总量稀释、光模块折价回吐条件之一成立；下修或给出2027保守结构指引=博主挤压情景权重上调",
+   "note": "AMZN通常晚约一周，四家看齐后才算该节点完成"
+  },
+  {
+   "date": "2026-07-30",
+   "date_confirmed": false,
+   "name": "三星 Q2 正式财报（分部数据）",
+   "category": "memory_truth",
+   "hypothesis": "存储ASP动能复核：分部能见底层ASP/bit拆分，确认初步业绩的营收微不及是否为DRAM ASP放缓的信号（vs NAND或其他非存储拖累），以及Q3指引是否释放减速预期",
+   "note": "正式财报含存储/代工/面板分部，比7/7初步业绩信息密度高一个数量级"
+  },
+  {
+   "date": "2026-08-11",
+   "date_confirmed": false,
+   "name": "LITE/COHR FY2026Q4财报（光芯片供给评述）",
+   "category": "optics_earnings",
+   "hypothesis": "EML/光芯片供给是否松动：评述转松=天孚分子修复时点提前；仍紧=修复后移至Q4，天孚中报环比容忍度需下调",
+   "note": "两家日期通常相隔数日，以先发者起算"
+  },
+  {
+   "date": "2026-08-20",
+   "date_confirmed": false,
+   "name": "天孚通信 2026中报",
+   "category": "optics_earnings",
+   "hypothesis": "三数验证：营收环比重新加速 + Q1存货/预付转化为收入 + 毛利率自56.6%回升（爬坡/培训拖累是否一次性）；三项全过=分子修复确认，任一不过则对照LITE/COHR节点的EML评述定位原因",
+   "note": "预约披露日期出来后翻true"
+  },
+  {
+   "date": "2026-08-25",
+   "date_confirmed": false,
+   "name": "中际旭创/新易盛 2026中报及指引",
+   "category": "optics_earnings",
+   "hypothesis": "订单层挤压是否首次兑现：龙头订单/指引无恙=挤压仍停留在估值层；指引下修=挤压穿透到订单层，修复论点作废。同时作为天孚下游排产的能见度读数",
+   "note": "与天孚中报谁先谁后不定，两条独立录入"
+  },
+  {
+   "date": "2026-09-05",
+   "date_confirmed": false,
+   "name": "TrendForce 2026Q3合同价季内修正观察窗",
+   "category": "trendforce_release",
+   "hypothesis": "修正差信号：季初预测+13~18%若无上修=降速坐实、挤压叙事进入衰减期；再度大幅上修=长协封顶失效、40%均值回归情景权重上调",
+   "note": "Q1先例为1月初预测55-60%、2月上修至90-95%；本节点观察的是修正行为本身，无固定发布日，8月中起留意press center"
   }
  ]
 }

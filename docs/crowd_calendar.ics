@@ -4,15 +4,87 @@ PRODID:-//crowd-monitor//CROWD//EN
 X-WR-CALNAME:CROWD 信息节点
 X-WR-TIMEZONE:Asia/Shanghai
 BEGIN:VEVENT
-DTSTART;VALUE=DATE:20260707
-DTEND;VALUE=DATE:20260708
-SUMMARY:（预估）三星 Q2 初步业绩（preliminary）［存储真值］
-DESCRIPTION:验证假设：存储ASP动能是否兑现Q2的合同价预测\n备注：三大存储厂最快真值，早于正式财报约3周
-UID:449c52c6f7fcf5fbe84fbe10f6bf30b06620a264@crowd-monitor
+DTSTART;VALUE=DATE:20260710
+DTEND;VALUE=DATE:20260711
+SUMMARY:（预估）SK海力士 ADR 纳斯达克上市［存储真值］
+DESCRIPTION:验证假设：存储侧情绪温度计：存储龙头选择在周期顶部区域赴美上市+上市首日定价反应=增量资金是否仍愿意在这个位置承接存储暴露\n备注：非真值节点，旁证用途；假设成立则说明存储侧增量资金仍在进场，不成立则佐证'Samsung sell the news'的获利了结叙事
+UID:e16a34603f160ecbf2dda49ee6aa81436853f601@crowd-monitor
 BEGIN:VALARM
 TRIGGER:-PT24H
 ACTION:DISPLAY
-DESCRIPTION:三星 Q2 初步业绩（preliminary） 倒计时1天
+DESCRIPTION:SK海力士 ADR 纳斯达克上市 倒计时1天
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;VALUE=DATE:20260729
+DTEND;VALUE=DATE:20260730
+SUMMARY:（预估）2026Q2 大厂财报季capex指引（META/MSFT/GOOGL先发）［Capex指引］
+DESCRIPTION:验证假设：分母总盘子检验：2026指引维持或上修=挤压被总量稀释、光模块折价回吐条件之一成立；下修或给出2027保守结构指引=博主挤压情景权重上调\n备注：AMZN通常晚约一周，四家看齐后才算该节点完成
+UID:d5d47fbeebb0e08e90c70a82024355b10dce2c1c@crowd-monitor
+BEGIN:VALARM
+TRIGGER:-PT24H
+ACTION:DISPLAY
+DESCRIPTION:2026Q2 大厂财报季capex指引（META/MSFT/GOOGL先发） 倒计时1天
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;VALUE=DATE:20260730
+DTEND;VALUE=DATE:20260731
+SUMMARY:（预估）三星 Q2 正式财报（分部数据）［存储真值］
+DESCRIPTION:验证假设：存储ASP动能复核：分部能见底层ASP/bit拆分，确认初步业绩的营收微不及是否为DRAM ASP放缓的信号（vs NAND或其他非存储拖累），以及Q3指引是否释放减速预期\n备注：正式财报含存储/代工/面板分部，比7/7初步业绩信息密度高一个数量级
+UID:2ef4e8e9cd3e345b42142606a84cd780312c564a@crowd-monitor
+BEGIN:VALARM
+TRIGGER:-PT24H
+ACTION:DISPLAY
+DESCRIPTION:三星 Q2 正式财报（分部数据） 倒计时1天
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;VALUE=DATE:20260811
+DTEND;VALUE=DATE:20260812
+SUMMARY:（预估）LITE/COHR FY2026Q4财报（光芯片供给评述）［光链财报］
+DESCRIPTION:验证假设：EML/光芯片供给是否松动：评述转松=天孚分子修复时点提前；仍紧=修复后移至Q4，天孚中报环比容忍度需下调\n备注：两家日期通常相隔数日，以先发者起算
+UID:01752a33baae8109866bb7bf8334a75ce3eb6354@crowd-monitor
+BEGIN:VALARM
+TRIGGER:-PT24H
+ACTION:DISPLAY
+DESCRIPTION:LITE/COHR FY2026Q4财报（光芯片供给评述） 倒计时1天
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;VALUE=DATE:20260820
+DTEND;VALUE=DATE:20260821
+SUMMARY:（预估）天孚通信 2026中报［光链财报］
+DESCRIPTION:验证假设：三数验证：营收环比重新加速 + Q1存货/预付转化为收入 + 毛利率自56.6%回升（爬坡/培训拖累是否一次性）；三项全过=分子修复确认，任一不过则对照LITE/COHR节点的EML评述定位原因\n备注：预约披露日期出来后翻true
+UID:fe70d3fca2eea1ce926aec7d3de2ee0dadc1b53d@crowd-monitor
+BEGIN:VALARM
+TRIGGER:-PT24H
+ACTION:DISPLAY
+DESCRIPTION:天孚通信 2026中报 倒计时1天
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;VALUE=DATE:20260825
+DTEND;VALUE=DATE:20260826
+SUMMARY:（预估）中际旭创/新易盛 2026中报及指引［光链财报］
+DESCRIPTION:验证假设：订单层挤压是否首次兑现：龙头订单/指引无恙=挤压仍停留在估值层；指引下修=挤压穿透到订单层，修复论点作废。同时作为天孚下游排产的能见度读数\n备注：与天孚中报谁先谁后不定，两条独立录入
+UID:06e32231ca9164cfbc88328f0541ad489e3ac555@crowd-monitor
+BEGIN:VALARM
+TRIGGER:-PT24H
+ACTION:DISPLAY
+DESCRIPTION:中际旭创/新易盛 2026中报及指引 倒计时1天
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;VALUE=DATE:20260905
+DTEND;VALUE=DATE:20260906
+SUMMARY:（预估）TrendForce 2026Q3合同价季内修正观察窗［TrendForce发布］
+DESCRIPTION:验证假设：修正差信号：季初预测+13~18%若无上修=降速坐实、挤压叙事进入衰减期；再度大幅上修=长协封顶失效、40%均值回归情景权重上调\n备注：Q1先例为1月初预测55-60%、2月上修至90-95%；本节点观察的是修正行为本身，无固定发布日，8月中起留意press center
+UID:4ad16a21c0c8c54b84c7dba72410ffa3391c8ed1@crowd-monitor
+BEGIN:VALARM
+TRIGGER:-PT24H
+ACTION:DISPLAY
+DESCRIPTION:TrendForce 2026Q3合同价季内修正观察窗 倒计时1天
 END:VALARM
 END:VEVENT
 END:VCALENDAR
