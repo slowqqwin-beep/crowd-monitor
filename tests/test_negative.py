@@ -80,7 +80,15 @@ def test_n8_ics_hypothesis():
 
 def test_n8_uid_idempotent():
     """UID must be based on name only — rescheduling same event should not change UID."""
-    name = "三星 Q2 初步业绩（preliminary）"
+    # Use first event from current calendar (avoids hardcoding obsolete event names)
+    cal_path = ROOT / "data" / "calendar.json"
+    if not cal_path.exists():
+        pytest.skip("calendar.json not found")
+    cal = json.loads(cal_path.read_text(encoding="utf-8"))
+    events = cal.get("events", [])
+    if not events:
+        pytest.skip("calendar.json has no events")
+    name = events[0]["name"]
     uid1 = hashlib.sha1(name.encode()).hexdigest() + "@crowd-monitor"
     # Simulate date change — UID should NOT include date
     uid_with_date = hashlib.sha1((name + "2026-07-07").encode()).hexdigest() + "@crowd-monitor"
