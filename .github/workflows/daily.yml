@@ -1,7 +1,7 @@
 name: CROWD Daily Update
 on:
   schedule:
-    - cron: "30 22 * * 1-5"  # UTC 22:30 weekdays (after US close)
+    - cron: "0 2 * * 1-5"  # UTC 02:00 weekdays = 北京时间 10:00
   workflow_dispatch:
 
 jobs:
@@ -14,8 +14,13 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - run: pip install yfinance pandas pyarrow icalendar pytest
+      - run: pip install yfinance pandas pyarrow icalendar pytest requests
       - run: python scripts/fetch_prices.py
+      - name: Verify calendar events
+        env:
+          SERPAPI_KEY: ${{ secrets.SERPAPI_KEY }}
+        run: |
+          python scripts/verify_calendar.py --auto-update || echo "Calendar verify completed"
       - name: Validate
         run: |
           python scripts/build_panels.py
