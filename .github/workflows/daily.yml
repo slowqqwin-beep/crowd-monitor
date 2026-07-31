@@ -15,20 +15,71 @@ jobs:
         with:
           python-version: "3.12"
       - run: pip install yfinance pandas pyarrow icalendar pytest requests
-      - run: python scripts/fetch_prices.py
-      - name: Verify calendar events
+
+      # Step 1: Fetch latest prices
+      - name: Fetch prices
+        run: python scripts/fetch_prices.py
+
+      # Step 2: Build panels + crowd_snapshot.json bridge
+      - name: Build panels and snapshot
+        run: python scripts/build_panels.py
+
+      # Step 3: Validate both panel_data.json and crowd_snapshot.json
+      - name: Validate outputs
+        run: |
+          python scripts/validate.py || { echo "VALIDATE FAILED — blocking commit"; exit 1; }
+          python -c "
+          import json, pathlib, sys
+          snap = pathlib.Path('data/crowd_snapshot.json')
+          if not snap.exists():
+              print('ERROR: data/crowd_snapshot.json not found'); sys.exit(1)
+          data = json.loads(snap.read_text(encoding='utf-8'))
+          assert 'as_of' in data, 'missing as_of'
+          assert 'baskets' in data, 'missing baskets'
+          assert 'scissors' in data, 'missing scissors'
+          for code in ('MEM', 'OPT', 'GPU', 'NCLOUD'):
+              assert code in data['baskets'], f'missing basket {code}'
+          print(f'[validate] crowd_snapshot.json OK, as_of={data[\"as_of\"]}')
+          "
+
+      # Step 4: Verify calendar events
+      - name: Verify calendar
         env:
           SERPAPI_KEY: ${{ secrets.SERPAPI_KEY }}
         run: |
           python scripts/verify_calendar.py --auto-update || echo "Calendar verify completed"
-      - name: Validate
+
+      # Step 5: Generate daily report (after build_panels ensures snapshot exists)
+      - name: Generate report
         run: |
-          python scripts/build_panels.py
-          python scripts/validate.py || { echo "VALIDATE FAILED — blocking commit"; exit 1; }
-      - run: pip install pytest && python -m pytest tests/test_negative.py -q --tb=short || { echo "NEGATIVE TESTS FAILED"; exit 1; }
+          python scripts/generate_report.py
+
+      # Step 6: Validate report contains snapshot data
+      - name: Validate report
+        run: |
+          REPORT=$(ls -t CROWD_Event_Report_*.md | head -1)
+          if [ -z "$REPORT" ]; then
+            echo "ERROR: No report file found"; exit 1
+          fi
+          if grep -q "未找到CROWD结构化快照" "$REPORT"; then
+            echo "ERROR: Report still shows snapshot missing"; exit 1
+          fi
+          if ! grep -q "存储" "$REPORT"; then
+            echo "ERROR: Report missing MEM basket"; exit 1
+          fi
+          echo "[validate] Report $REPORT contains snapshot data"
+
+      # Step 7: Run negative tests
+      - name: Negative tests
+        run: python -m pytest tests/test_negative.py -q --tb=short || { echo "NEGATIVE TESTS FAILED"; exit 1; }
+
+      # Step 8: Commit all task-produced files
       - name: Commit and push
         run: |
           git config user.name "crowd-bot"
           git config user.email "bot@crowd-monitor"
           git add docs/data/*.json docs/crowd_calendar.ics
+          git add data/crowd_snapshot.json
+          git add data/calendar.json
+          git add CROWD_Event_Report_*.md
           git diff --staged --quiet || (git commit -m "auto: $(date +%Y-%m-%d) daily update" && git push)

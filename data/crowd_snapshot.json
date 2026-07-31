@@ -1,0 +1,40 @@
+{
+  "as_of": "2026-07-02",
+  "benchmark": "SOXX=1.0",
+  "scissors": {
+    "formula": "MEM/SOXX - OPT/SOXX",
+    "value": 6.2347,
+    "direction_20d": "up",
+    "direction_60d": "up"
+  },
+  "baskets": {
+    "MEM": {
+      "label": "存储",
+      "ratio": 7.8989,
+      "momentum_20d": 1.33,
+      "momentum_60d": 56.82,
+      "z_score": 1.81
+    },
+    "OPT": {
+      "label": "光通信",
+      "ratio": 1.6642,
+      "momentum_20d": -17.9,
+      "momentum_60d": -36.72,
+      "z_score": -0.23
+    },
+    "GPU": {
+      "label": "GPU链",
+      "ratio": 0.8204,
+      "momentum_20d": -5.24,
+      "momentum_60d": -12.31,
+      "z_score": -1.67
+    },
+    "NCLOUD": {
+      "label": "新云",
+      "ratio": 0.8417,
+      "momentum_20d": -20.83,
+      "momentum_60d": -20.88,
+      "z_score": -1.43
+    }
+  }
+}

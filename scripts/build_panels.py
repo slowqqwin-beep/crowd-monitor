@@ -188,4 +188,85 @@ if CALENDAR_PATH.exists():
     ics_path.write_text(ics_text, encoding="utf-8")
     print(f"[build] {ics_path.name} written, {len(cal['events'])} events")
 
+# ── Structured bridge: data/crowd_snapshot.json ──
+SNAPSHOT_DIR = ROOT / "data"
+SNAPSHOT_PATH = SNAPSHOT_DIR / "crowd_snapshot.json"
+
+def _direction_from_momentum(mom_value):
+    """Convert a numeric momentum percentage to a direction string."""
+    if mom_value is None:
+        return None
+    if mom_value > 0.5:
+        return "up"
+    if mom_value < -0.5:
+        return "down"
+    return "flat"
+
+def _scissors_momentum(scissors_series, window):
+    """Compute momentum of the scissors series over a given window."""
+    if scissors_series is None:
+        return None
+    s = scissors_series.dropna()
+    if len(s) <= window:
+        return None
+    current = float(s.iloc[-1])
+    past = float(s.iloc[-1 - window])
+    if past == 0:
+        return None
+    return round((current - past) * 100, 2)
+
+scissors_value = None
+scissors_mom20 = None
+scissors_mom60 = None
+if scissors is not None:
+    s_drop = scissors.dropna()
+    if len(s_drop) > 0:
+        scissors_value = round(float(s_drop.iloc[-1]), 4)
+    scissors_mom20 = _scissors_momentum(scissors, 20)
+    scissors_mom60 = _scissors_momentum(scissors, 60)
+
+snapshot_baskets = {}
+for reading in readings:
+    snapshot_baskets[reading["basket"]] = {
+        "label": reading["label"],
+        "ratio": reading["ratio"],
+        "momentum_20d": reading["momentum_20d"],
+        "momentum_60d": reading["momentum_60d"],
+        "z_score": reading["z_score"],
+    }
+
+crowd_snapshot = {
+    "as_of": panel_data["data_as_of"],
+    "benchmark": f"{benchmark_ticker}=1.0",
+    "scissors": {
+        "formula": "MEM/SOXX - OPT/SOXX",
+        "value": scissors_value,
+        "direction_20d": _direction_from_momentum(scissors_mom20),
+        "direction_60d": _direction_from_momentum(scissors_mom60),
+    },
+    "baskets": snapshot_baskets,
+}
+
+# Atomic write: temp file → JSON validation → rename
+import tempfile
+SNAPSHOT_DIR.mkdir(parents=True, exist_ok=True)
+tmp_fd, tmp_path = tempfile.mkstemp(
+    dir=str(SNAPSHOT_DIR), prefix=".crowd_snapshot_", suffix=".tmp"
+)
+try:
+    with open(tmp_fd, "w", encoding="utf-8") as f:
+        json.dump(crowd_snapshot, f, ensure_ascii=False, indent=2)
+    # Validate the written JSON before replacing
+    with open(tmp_path, "r", encoding="utf-8") as f:
+        json.load(f)
+    pathlib.Path(tmp_path).replace(SNAPSHOT_PATH)
+    print(f"[build] crowd_snapshot.json written, as_of={crowd_snapshot['as_of']}")
+except Exception:
+    # Clean up temp file on failure
+    try:
+        pathlib.Path(tmp_path).unlink(missing_ok=True)
+    except OSError:
+        pass
+    raise
+
 print("[build] Done.")
