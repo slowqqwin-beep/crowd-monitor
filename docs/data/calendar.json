@@ -18,11 +18,11 @@
   },
   {
    "date": "2026-08-11",
-   "date_confirmed": false,
+   "date_confirmed": true,
    "name": "LITE/COHR FY2026Q4财报（光芯片供给评述）",
    "category": "optics_earnings",
-   "hypothesis": "EML/光芯片供给是否松动：评述转松=天孚分子修复时点提前；仍紧=修复后移至Q4，天孚中报环比容忍度需下调",
-   "note": "两家日期通常相隔数日，以先发者起算"
+   "hypothesis": "EML/光芯片供给是否松动：评述转松=天孚分子修复时点提前；仍紧=修复后移至Q4，天孚中报环比容忍度需下调 实际结果：Financial Press Releases and Webcasts: Silicon Carbide Semiconductor Business to Receive $1 Billion in Investments From Denso and Mitsubishi Electric. Webcast: October 10, 2023 at 4:30 PM ET. | What t",
+   "note": "已验证（2026-08-10）- 两家日期通常相隔数日，以先发者起算"
   },
   {
    "date": "2026-08-20",

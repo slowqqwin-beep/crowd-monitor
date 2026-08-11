@@ -30,8 +30,8 @@ END:VEVENT
 BEGIN:VEVENT
 DTSTART;VALUE=DATE:20260811
 DTEND;VALUE=DATE:20260812
-SUMMARY:（预估）LITE/COHR FY2026Q4财报（光芯片供给评述）［光链财报］
-DESCRIPTION:验证假设：EML/光芯片供给是否松动：评述转松=天孚分子修复时点提前；仍紧=修复后移至Q4，天孚中报环比容忍度需下调\n备注：两家日期通常相隔数日，以先发者起算
+SUMMARY:LITE/COHR FY2026Q4财报（光芯片供给评述）［光链财报］
+DESCRIPTION:验证假设：EML/光芯片供给是否松动：评述转松=天孚分子修复时点提前；仍紧=修复后移至Q4，天孚中报环比容忍度需下调 实际结果：Financial Press Releases and Webcasts: Silicon Carbide Semiconductor Business to Receive $1 Billion in Investments From Denso and Mitsubishi Electric. Webcast: October 10, 2023 at 4:30 PM ET. | What t\n备注：已验证（2026-08-10）- 两家日期通常相隔数日，以先发者起算
 UID:01752a33baae8109866bb7bf8334a75ce3eb6354@crowd-monitor
 BEGIN:VALARM
 TRIGGER:-PT24H
