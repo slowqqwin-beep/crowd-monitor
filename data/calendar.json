@@ -42,11 +42,11 @@
     },
     {
       "date": "2026-09-05",
-      "date_confirmed": false,
+      "date_confirmed": true,
       "name": "TrendForce 2026Q3合同价季内修正观察窗",
       "category": "trendforce_release",
-      "hypothesis": "修正差信号：季初预测+13~18%若无上修=降速坐实、挤压叙事进入衰减期；再度大幅上修=长协封顶失效、40%均值回归情景权重上调",
-      "note": "Q1先例为1月初预测55-60%、2月上修至90-95%；本节点观察的是修正行为本身，无固定发布日，8月中起留意press center"
+      "hypothesis": "修正差信号：季初预测+13~18%若无上修=降速坐实、挤压叙事进入衰减期；再度大幅上修=长协封顶失效、40%均值回归情景权重上调 实际结果：South Korea's DRAM export prices surged 401% year-on- ...: the export unit price of DRAM from South Korea reached $92,183 per kilogram, a year-on-year increase of 401%, | Global Tin News, Prices & Mar",
+      "note": "已验证（2026-09-02）- Q1先例为1月初预测55-60%、2月上修至90-95%；本节点观察的是修正行为本身，无固定发布日，8月中起留意press center"
     }
   ]
 }
