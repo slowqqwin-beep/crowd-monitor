@@ -1,40 +1,40 @@
 {
-  "as_of": "2026-11-03",
+  "as_of": "2026-11-04",
   "benchmark": "SOXX=1.0",
   "scissors": {
     "formula": "MEM/SOXX - OPT/SOXX",
-    "value": 2.0765,
-    "direction_20d": "up",
+    "value": 1.8602,
+    "direction_20d": "down",
     "direction_60d": "up"
   },
   "baskets": {
     "MEM": {
       "label": "存储",
-      "ratio": 3.2088,
-      "momentum_20d": -5.38,
-      "momentum_60d": 8.79,
-      "z_score": 0.68
+      "ratio": 2.871,
+      "momentum_20d": -13.22,
+      "momentum_60d": 3.05,
+      "z_score": 0.51
     },
     "OPT": {
       "label": "光通信",
-      "ratio": 1.1323,
-      "momentum_20d": -17.1,
-      "momentum_60d": -17.31,
-      "z_score": -1.2
+      "ratio": 1.0108,
+      "momentum_20d": -20.62,
+      "momentum_60d": -19.99,
+      "z_score": -1.36
     },
     "GPU": {
       "label": "GPU链",
-      "ratio": 0.8275,
-      "momentum_20d": 5.25,
-      "momentum_60d": 5.21,
-      "z_score": 0.38
+      "ratio": 0.8607,
+      "momentum_20d": 6.34,
+      "momentum_60d": 8.26,
+      "z_score": 0.59
     },
     "NCLOUD": {
       "label": "新云",
-      "ratio": 0.4347,
-      "momentum_20d": -24.37,
-      "momentum_60d": -21.22,
-      "z_score": -2.19
+      "ratio": 0.3944,
+      "momentum_20d": -26.29,
+      "momentum_60d": -27.93,
+      "z_score": -2.5
     }
   }
 }
